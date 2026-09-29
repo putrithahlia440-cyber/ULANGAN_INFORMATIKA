@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ULANGAN HARIAN SISTEM KOMPUTER & OS</title>
+<style>
+:root{--bg:#07111f;--panel:#0d1c2d;--text:#eff8ff;--muted:#aec2d5;--cyan:#48ddff;--violet:#9c7dff;--green:#55e6a5;--yellow:#ffd166;--red:#ff7180;--line:#ffffff1c}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 10% 10%,#173a5b 0,transparent 40%),radial-gradient(circle at 90% 90%,#292052 0,transparent 40%),var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;padding:20px}
+.container{max-width:920px;margin:auto;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:25px;box-shadow:0 15px 35px #0008}
+header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.timer-badge{background:#162c43;padding:8px 15px;border-radius:30px;border:1px solid var(--cyan);color:var(--cyan);font-weight:bold}
+.cheat-badge{background:#431616;padding:8px 15px;border-radius:30px;border:1px solid var(--red);color:var(--red);font-weight:bold;font-size:13px}
+.card{background:#ffffff05;border:1px solid var(--line);border-radius:15px;padding:20px;margin-bottom:20px}
+.btn{background:linear-gradient(135deg,var(--cyan),var(--violet));color:#000;font-weight:bold;border:none;padding:12px 24px;border-radius:10px;cursor:pointer;font-size:16px;transition:.2s}
+.btn:hover{opacity:0.9}
+.btn-secondary{background:#162c43;color:var(--text);border:1px solid var(--line)}
+.btn-secondary:hover{background:#203c5a}
+.btn-container{display:flex;gap:15px;margin-top:20px;justify-content:space-between}
+input[type="text"], textarea, select{width:100%;padding:12px;background:#162c43;border:1px solid var(--line);color:var(--text);border-radius:8px;margin:8px 0 15px;font-size:15px}
+textarea{min-height:150px;resize:vertical}
+select{cursor:pointer}
+select option{background:var(--panel);color:var(--text)}
+.matching-table{width:100%;border-collapse:collapse;margin-top:10px}
+.matching-table th, .matching-table td{border:1px solid var(--line);padding:10px;text-align:left}
+.matching-table th{background:#ffffff10;color:var(--cyan)}
+.blank-item{background:#ffffff08;padding:10px;border-radius:8px;margin-bottom:10px;border:1px solid var(--line)}
+.lock-screen{text-align:center;padding:40px 20px}
+.lock-screen h2{color:var(--red);margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- HALAMAN TERKUNCI (JIKA SUDAH PERNAH UJIAN) -->
+  <div id="already-submitted-screen" class="card lock-screen" style="display:none;">
+    <h2>🚫 AKSES DITOLAK</h2>
+    <p style="color:var(--muted); font-size:16px;">Anda telah menyelesaikan ujian ini sebelumnya.</p>
+    <p style="color:var(--yellow); font-size:14px;">Setiap siswa hanya memiliki <b>1 kali kesempatan</b> untuk mengerjakan.</p>
+  </div>
+
+  <!-- HALAMAN MULAI -->
+  <div id="start-screen">
+    <h2>🚀 ULANGAN HARIAN: SISTEM KOMPUTER & OS</h2>
+    <p style="color:var(--muted)">Materi: Arsitektur Komputer, Hardware, Software, Brainware & OS (Durasi: 80 Menit)</p>
+    <div class="card">
+      <p style="color:var(--yellow); font-size:14px; line-height:1.6;">
+        ⚠️ <b>PETUNJUK & ATURAN UJIAN:</b><br>
+        1. Ujian ini hanya dapat dikerjakan <b>1 KALI PERCOBAAN</b>.<br>
+        2. Waktu pengerjaan adalah <b>80 MENIT</b>.<br>
+        3. Siswa dapat berpindah antarsoal menggunakan tombol <b>Kembali</b> dan <b>Selanjutnya</b>.<br>
+        4. <b>DILARANG berpindah tab atau keluar dari tampilan Fullscreen</b>. Jika melanggar walau 1 kali, jawaban akan langsung terkirim otomatis.<br>
+      </p>
+      <label>Nama Lengkap Siswa:</label>
+      <input type="text" id="student-name" placeholder="Masukkan nama lengkap..." required>
+      <label>Kelas:</label>
+      <input type="text" id="student-class" placeholder="Contoh: X A" required>
+      <button class="btn" style="width:100%;" type="button" onclick="startExam()">Mulai Ujian</button>
+    </div>
+  </div>
+
+  <!-- HALAMAN SOAL -->
+  <div id="exam-screen" style="display:none;">
+    <header>
+      <div><b id="q-number">Soal 1 / 10</b></div>
+      <div class="cheat-badge">
+        ⚠️ Dilarang Keluar/Pindah Tab
+      </div>
+      <div class="timer-badge">⏱️ <span id="timer">80:00</span></div>
+    </header>
+
+    <div class="card">
+      <h3 id="question-title" style="color:var(--cyan); margin-top:0;">Judul Soal</h3>
+      <p id="question-text" style="line-height: 1.6; white-space: pre-line;">Teks Soal...</p>
+      
+      <!-- CONTROLLER DYNAMIC INPUT -->
+      <div id="input-container"></div>
+
+      <!-- NAVIGASI TOMBOL BACK DAN NEXT -->
+      <div class="btn-container">
+        <button id="prev-btn" class="btn btn-secondary" style="width:48%;" onclick="prevQuestion()">← Soal Sebelumnya</button>
+        <button id="next-btn" class="btn" style="width:48%;" onclick="nextQuestion()">Soal Berikutnya →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN SELESAI -->
+  <div id="result-screen" style="display:none;">
+    <div class="card" style="text-align:center; padding:40px 20px;">
+      <h2 style="color:var(--green); margin-top:0;">🎉 Ujian Telah Selesai!</h2>
+      <p style="color:var(--muted); font-size:16px;">Jawaban Anda telah berhasil direkam oleh sistem.</p>
+      <p id="submit-type-display" style="font-weight:bold; color:var(--violet); margin-top:15px;"></p>
+      <p id="send-status" style="color:var(--yellow); font-weight:bold; margin-top:10px;">⌛ Mengirimkan hasil ke Google Spreadsheet...</p>
+      <hr style="border:0; border-top:1px solid var(--line); margin:25px 0;">
+      <p style="color:var(--muted); font-size:13px;">Penilaian dan rekapitulasi nilai akhir akan diproses secara langsung oleh guru melalui Spreadsheet.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyV9aCeSK54LZQeotEqgi41d6A-UbPmVOQLcqOcO-unGAZ1ykImZcAQycRbPhyexFGE-g/exec";
+
+// CEK PERCOBAAN UJIAN (1 KALI PERCOBAAN VIA LOCALSTORAGE)
+window.addEventListener("DOMContentLoaded", () => {
+  if (localStorage.getItem("exam_submitted_sistem_komputer") === "true") {
+    document.getElementById("start-screen").style.display = "none";
+    document.getElementById("already-submitted-screen").style.display = "block";
+  }
+});
+
+// BANK SOAL
+const examQuestions = [
+  // --- A. SOAL ESAI ---
+  {
+    type: "essay",
+    title: "A. SOAL ESAI (1/5) - Sistem Komputer",
+    q: "Rani sedang mengerjakan tugas membuat laporan menggunakan laptop. Ia mengetik laporan menggunakan keyboard, membuka aplikasi pengolah kata, melihat hasil pekerjaannya melalui monitor, dan menyimpan laporan tersebut agar dapat dibuka kembali. Dalam kegiatan tersebut, Rani menggunakan beberapa bagian dari sistem komputer.\n\nBerdasarkan cerita tersebut, analisislah bagaimana hardware, software, dan brainware bekerja sama dalam kegiatan Rani. Jelaskan peran masing-masing secara rinci!"
+  },
+  {
+    type: "essay",
+    title: "A. SOAL ESAI (2/5) - Input–Process–Output–Storage",
+    q: "Andi membantu gurunya memasukkan nilai siswa ke dalam komputer. Andi mengetik data nilai menggunakan keyboard. Setelah data dimasukkan, komputer mengolah data tersebut menggunakan CPU dan menampilkan hasil pengolahan pada monitor. Setelah selesai, guru menyimpan hasil tersebut agar dapat digunakan kembali.\n\nJelaskan urutan proses yang terjadi pada kegiatan tersebut mulai dari input, process, output, hingga storage!"
+  },
+  {
+    type: "essay",
+    title: "A. SOAL ESAI (3/5) - Arsitektur Von Neumann",
+    q: "Dika sedang menggunakan komputer untuk menjalankan sebuah aplikasi pembelajaran. Ketika Dika memberikan perintah, instruksi dan data yang diperlukan disimpan di dalam memori. CPU kemudian mengambil instruksi dan data tersebut dari memori untuk diproses hingga menghasilkan keluaran yang dapat dilihat oleh Dika.\n\nBerdasarkan cerita tersebut, jelaskan bagaimana konsep arsitektur Von Neumann memungkinkan komputer menjalankan suatu perintah. Jelaskan hubungan antara memory dan CPU dalam proses tersebut!"
+  },
+  {
+    type: "essay",
+    title: "A. SOAL ESAI (4/5) - CPU, ALU, Control Unit, dan Register",
+    q: "Raka menggunakan komputer untuk melakukan sebuah perhitungan. Ketika Raka memberikan perintah, CPU mengatur proses pengolahan data. Perhitungan dilakukan oleh bagian CPU yang menangani operasi aritmatika dan logika, sedangkan data atau instruksi yang sedang digunakan dapat disimpan sementara di dalam CPU.\n\nBerdasarkan cerita tersebut, jelaskan bagaimana CPU bekerja. Kemudian jelaskan perbedaan fungsi ALU, Control Unit (CU), dan Register dalam proses pengolahan data!"
+  },
+  {
+    type: "essay",
+    title: "A. SOAL ESAI (5/5) - RAM dan CPU",
+    q: "Budi membuka browser, aplikasi pengolah kata, pemutar musik, dan beberapa aplikasi lainnya secara bersamaan. Pada awalnya laptop berjalan dengan normal. Namun, setelah semakin banyak aplikasi dibuka, laptop terasa lebih lambat. Setelah Budi menutup beberapa aplikasi, laptop kembali terasa lebih ringan.\n\nBerdasarkan cerita tersebut, analisislah hubungan antara RAM, CPU, dan banyaknya aplikasi yang digunakan. Mengapa laptop Budi dapat terasa lebih lambat?"
+  },
+
+  // --- B. SOAL ISIAN SINGKAT ---
+  {
+    type: "blank_fill",
+    title: "B. SOAL ISIAN SINGKAT (1/4) - Input–Process–Output–Storage",
+    q: "Andi membantu gurunya memasukkan nilai siswa ke dalam komputer. Ia mengetik data nilai menggunakan keyboard. Setelah data dimasukkan, komputer mengolah data tersebut menggunakan CPU dan menampilkan hasilnya pada monitor. Setelah selesai, hasil pengolahan nilai disimpan agar dapat digunakan kembali.\n\nBerdasarkan kegiatan tersebut, isilah titik-titik berikut:",
+    blanks: [
+      { label: "Keyboard berfungsi sebagai" },
+      { label: "CPU melakukan" },
+      { label: "Monitor menghasilkan" },
+      { label: "Penyimpanan hasil termasuk" }
+    ]
+  },
+  {
+    type: "blank_fill",
+    title: "B. SOAL ISIAN SINGKAT (2/4) - Arsitektur Von Neumann",
+    q: "Dika sedang menggunakan komputer untuk menjalankan sebuah aplikasi pembelajaran. Ketika Dika memberikan perintah, instruksi dan data yang diperlukan disimpan terlebih dahulu di memori. CPU kemudian mengambil instruksi dan data tersebut untuk diproses hingga menghasilkan keluaran.\n\nDalam arsitektur Von Neumann, isilah titik-titik berikut:",
+    blanks: [
+      { label: "Instruksi dan data disimpan dalam" },
+      { label: "CPU mengambilnya untuk melakukan" },
+      { label: "Bagian CPU yang mengatur jalannya instruksi adalah" }
+    ]
+  },
+  {
+    type: "blank_fill",
+    title: "B. SOAL ISIAN SINGKAT (3/4) - CPU, ALU, CU, dan Register",
+    q: "Raka menggunakan komputer untuk melakukan perhitungan. Saat perintah diberikan, CPU mengatur proses pengolahan data. Perhitungan dilakukan oleh bagian CPU yang menangani operasi aritmatika dan logika, sedangkan data yang sedang diproses dapat disimpan sementara pada tempat penyimpanan kecil di dalam CPU.\n\nBerdasarkan cerita tersebut, isilah titik-titik berikut:",
+    blanks: [
+      { label: "Bagian CPU yang melakukan perhitungan disebut" },
+      { label: "Bagian yang mengatur jalannya instruksi disebut" },
+      { label: "Tempat penyimpanan sementara di dalam CPU disebut" }
+    ]
+  },
+  {
+    type: "blank_fill",
+    title: "B. SOAL ISIAN SINGKAT (4/4) - RAM, CPU, dan Banyak Aplikasi",
+    q: "Budi membuka browser, aplikasi pengolah kata, pemutar musik, dan beberapa aplikasi lainnya secara bersamaan. RAM digunakan sebagai ruang kerja sementara untuk menyimpan data dan program yang sedang digunakan. CPU mengerjakan instruksi dari berbagai proses tersebut. Ketika terlalu banyak aplikasi aktif, penggunaan sumber daya meningkat sehingga komputer dapat terasa lebih lambat.\n\nBerdasarkan cerita tersebut, isilah titik-titik berikut:",
+    blanks: [
+      { label: "RAM berfungsi sebagai" },
+      { label: "CPU berfungsi sebagai" },
+      { label: "Jika banyak aplikasi digunakan bersamaan, penggunaan sumber daya komputer dapat" },
+      { label: "Dan komputer dapat terasa lebih" }
+    ]
+  },
+
+  // --- C. SOAL MENJODOHKAN ---
+  {
+    type: "matching",
+    title: "C. SOAL MENJODOHKAN - Sistem Operasi",
+    q: "Petunjuk: Pasangkan pernyataan pada Kolom A dengan jawaban yang tepat pada Kolom B.",
+    pairs: [
+      { id: 1, text: "1. Sistem operasi yang banyak digunakan pada komputer dan laptop." },
+      { id: 2, text: "2. Sistem operasi yang banyak digunakan pada smartphone." },
+      { id: 3, text: "3. Sistem operasi yang digunakan pada komputer Mac." },
+      { id: 4, text: "4. Sistem operasi yang banyak digunakan pada server dan dapat dikonfigurasi sesuai kebutuhan." },
+      { id: 5, text: "5. Perangkat lunak yang mengatur CPU, RAM, file, perangkat, dan aplikasi." }
+    ],
+    options: [
+      { code: "A", name: "A. Android" },
+      { code: "B", name: "B. Linux" },
+      { code: "C", name: "C. Windows" },
+      { code: "D", name: "D. macOS" },
+      { code: "E", name: "E. Sistem Operasi" }
+    ]
+  }
+];
+
+let currentIdx = 0;
+let userAnswers = {};
+let studentInfo = { nama: "", kelas: "" };
+
+let totalTimeInSeconds = 80 * 60; // 80 Menit
+let timerInterval = null;
+let submitType = "Manual (Selesai Tepat Waktu)";
+
+let tabCount = 0, fsCount = 0;
+let cheatLogs = [];
+let isExamActive = false;
+
+function startExam() {
+  const name = document.getElementById("student-name").value.trim();
+  const cls = document.getElementById("student-class").value.trim();
+  if(!name || !cls) { alert("Harap isi Nama dan Kelas!"); return; }
+  studentInfo.nama = name; studentInfo.kelas = cls;
+  
+  requestFullscreen();
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("exam-screen").style.display = "block";
+  
+  isExamActive = true;
+  setupAntiCheatListeners();
+  startTimer();
+  renderQuestion();
+}
+
+function requestFullscreen() {
+  const elem = document.documentElement;
+  if (elem.requestFullscreen) elem.requestFullscreen().catch(()=>{});
+  else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+}
+
+// ANTI CHEAT: Sekali keluar/pindah tab LANGSUNG TERKIRIM
+function setupAntiCheatListeners() {
+  document.addEventListener("visibilitychange", () => {
+    if (isExamActive && document.hidden) {
+      tabCount++;
+      recordCheat(`Meninggalkan Laman / Pindah Tab`);
+      triggerAutoSubmit("Otomatis (Pelanggaran: Meninggalkan Laman / Pindah Tab)");
+    }
+  });
+
+  document.addEventListener("fullscreenchange", () => {
+    if (isExamActive && !document.fullscreenElement) {
+      fsCount++;
+      recordCheat(`Keluar dari Layar Penuh (Fullscreen)`);
+      triggerAutoSubmit("Otomatis (Pelanggaran: Keluar dari Layar Penuh)");
+    }
+  });
+}
+
+function recordCheat(reason) {
+  cheatLogs.push(`[${new Date().toLocaleTimeString('id-ID')}] ${reason}`);
+}
+
+function triggerAutoSubmit(reasonType) {
+  if (!isExamActive) return;
+  isExamActive = false;
+  submitType = reasonType;
+  alert(`🚨 UJIAN DIHENTIKAN!\nAlasan: ${reasonType}. Jawaban Anda dikirim secara otomatis.`);
+  finishExam();
+}
+
+function startTimer() {
+  const timerElem = document.getElementById("timer");
+  timerInterval = setInterval(() => {
+    if (totalTimeInSeconds <= 0) {
+      clearInterval(timerInterval);
+      triggerAutoSubmit("Otomatis (Waktu 80 Menit Habis)");
+      return;
+    }
+    totalTimeInSeconds--;
+    const m = Math.floor(totalTimeInSeconds / 60);
+    const s = totalTimeInSeconds % 60;
+    timerElem.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }, 1000);
+}
+
+function renderQuestion() {
+  document.getElementById("q-number").textContent = `Soal ${currentIdx + 1} / ${examQuestions.length}`;
+
+  const qData = examQuestions[currentIdx];
+  document.getElementById("question-title").textContent = qData.title;
+  document.getElementById("question-text").textContent = qData.q;
+  
+  const container = document.getElementById("input-container");
+  container.innerHTML = "";
+
+  if (qData.type === "essay") {
+    const txt = document.createElement("textarea");
+    txt.placeholder = "Tuliskan jawaban analisis lengkap Anda di sini...";
+    txt.value = userAnswers[currentIdx] || "";
+    txt.oninput = (e) => { userAnswers[currentIdx] = e.target.value; };
+    container.appendChild(txt);
+  } 
+  else if (qData.type === "blank_fill") {
+    if (!userAnswers[currentIdx]) userAnswers[currentIdx] = {};
+    qData.blanks.forEach((b, bIdx) => {
+      const box = document.createElement("div");
+      box.className = "blank-item";
+      box.innerHTML = `<label><b>${bIdx + 1}. ${b.label} :</b></label>`;
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.placeholder = "Ketik jawaban...";
+      inp.value = userAnswers[currentIdx][bIdx] || "";
+      inp.oninput = (e) => { userAnswers[currentIdx][bIdx] = e.target.value; };
+      box.appendChild(inp);
+      container.appendChild(box);
+    });
+  } 
+  else if (qData.type === "matching") {
+    if (!userAnswers[currentIdx]) userAnswers[currentIdx] = {};
+    const table = document.createElement("table");
+    table.className = "matching-table";
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>Kolom A (Pernyataan)</th>
+          <th style="width: 220px;">Kolom B (Pilih Jawaban)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    `;
+    const tbody = table.querySelector("tbody");
+    
+    qData.pairs.forEach((p) => {
+      const tr = document.createElement("tr");
+      const selectOptions = qData.options.map(o => `<option value="${o.name}">${o.name}</option>`).join("");
+      tr.innerHTML = `
+        <td>${p.text}</td>
+        <td>
+          <select id="match-select-${p.id}">
+            <option value="">-- Pilih Pasangan --</option>
+            ${selectOptions}
+          </select>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+    
+    container.appendChild(table);
+
+    qData.pairs.forEach((p) => {
+      const sel = document.getElementById(`match-select-${p.id}`);
+      if (userAnswers[currentIdx][p.id]) sel.value = userAnswers[currentIdx][p.id];
+      sel.onchange = (e) => { userAnswers[currentIdx][p.id] = e.target.value; };
+    });
+  }
+
+  // ATUR ATRIBUT DAN TAMPILAN TOMBOL KEMBALI & LANJUT
+  const prevBtn = document.getElementById("prev-btn");
+  const nextBtn = document.getElementById("next-btn");
+
+  if (currentIdx === 0) {
+    prevBtn.style.visibility = "hidden"; // Sembunyikan tombol 'Sebelumnya' jika di soal pertama
+  } else {
+    prevBtn.style.visibility = "visible";
+  }
+
+  if (currentIdx === examQuestions.length - 1) {
+    nextBtn.textContent = "Selesaikan & Kirim Ujian 🎉";
+  } else {
+    nextBtn.textContent = "Soal Berikutnya →";
+  }
+}
+
+function prevQuestion() {
+  if (currentIdx > 0) {
+    currentIdx--;
+    renderQuestion();
+  }
+}
+
+function nextQuestion() {
+  if (currentIdx < examQuestions.length - 1) {
+    currentIdx++;
+    renderQuestion();
+  } else {
+    if (confirm("Apakah Anda yakin ingin menyelesaikan dan mengirim ujian ini?")) {
+      finishExam();
+    }
+  }
+}
+
+function finishExam() {
+  isExamActive = false;
+  if (timerInterval) clearInterval(timerInterval);
+
+  // SIMPAN TANDA BAHWA SISWA SUDAH PERNAH UJIAN (1x PERCOBAAN)
+  localStorage.setItem("exam_submitted_sistem_komputer", "true");
+
+  document.getElementById("exam-screen").style.display = "none";
+  document.getElementById("result-screen").style.display = "block";
+  document.getElementById("submit-type-display").textContent = `📌 Status Pengiriman: ${submitType}`;
+
+  sendDataToSpreadsheet();
+}
+
+function formatFullTextAnswers() {
+  let textOutput = "";
+
+  examQuestions.forEach((q, idx) => {
+    textOutput += `=== ${q.title} ===\n`;
+    const ans = userAnswers[idx];
+
+    if (q.type === "essay") {
+      textOutput += `Jawaban: ${ans || '(Tidak diisi)'}\n\n`;
+    } else if (q.type === "blank_fill") {
+      q.blanks.forEach((b, bIdx) => {
+        textOutput += `[Isian ${bIdx+1}] ${b.label}: ${ans ? (ans[bIdx] || '-') : '-'}\n`;
+      });
+      textOutput += `\n`;
+    } else if (q.type === "matching") {
+      q.pairs.forEach((p) => {
+        textOutput += `Pernyataan ${p.id} -> Pasangan: ${ans ? (ans[p.id] || '-') : '-'}\n`;
+      });
+      textOutput += `\n`;
+    }
+  });
+
+  return textOutput;
+}
+
+// FUNGSI PENGIRIMAN DATA REVISI
+function sendDataToSpreadsheet() {
+  const statusElem = document.getElementById("send-status");
+
+  const payload = {
+    nama: studentInfo.nama,
+    kelas: studentInfo.kelas,
+    statusSubmit: submitType,
+    totalPindahTab: tabCount,
+    totalExitFullscreen: fsCount,
+    logPelanggaran: cheatLogs.length > 0 ? cheatLogs.join("\n") : "Tidak Ada Pelanggaran (Siswa Jujur)",
+    jawabanTeksPanjang: formatFullTextAnswers(),
+    rawAnswers: userAnswers // Kirim data mentah untuk penilaian otomatis di Apps Script
+  };
+
+  fetch(GOOGLE_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  }).then(() => {
+    statusElem.textContent = "✅ Semua jawaban berhasil terkirim ke Google Spreadsheet Guru!";
+    statusElem.style.color = "var(--green)";
+  }).catch(() => {
+    statusElem.textContent = "⚠️ Gagal mengirim data secara otomatis. Periksa koneksi internet.";
+    statusElem.style.color = "var(--red)";
+  });
+}
+</script>
+</body>
+</html>
